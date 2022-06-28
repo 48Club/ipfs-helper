@@ -69,6 +69,7 @@ func pinIpfs(ipfs []string) {
 		if err != nil {
 			log.Printf("ipfs pin err: %s", err.Error())
 		}
+		defer resp.Body.Close()
 	}
 }
 
