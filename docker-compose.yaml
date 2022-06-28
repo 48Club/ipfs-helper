@@ -1,6 +1,7 @@
 version: "3"
 services:
   ipfs:
+    restart: always
     image: ipfs/go-ipfs
     dns:
       - 1.1.1.1
@@ -15,6 +16,7 @@ services:
       - /mnt/ipfs:/data/ipfs
 
   helper:
+    restart: always
     build: helper
     depends_on:
       - ipfs
