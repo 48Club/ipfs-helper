@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"net/http"
@@ -30,18 +32,57 @@ func main() {
 	for {
 		infoIpfs := formatIpfs(getIpfsHash())
 		pinIpfs(infoIpfs)
+		imgIpfs := formatIpfs(getInfo(infoIpfs))
+		pinIpfs(imgIpfs)
 		<-tc.C
 	}
 }
 
+func getInfo(ipfs []string) (newList []string) {
+	for _, v := range ipfs {
+		resp, err := http.Post(fmt.Sprintf("%s/api/v0/cat?arg=%s", ipfsApiAddr, v), "text/plain; charset=utf-8", nil)
+		if resp.StatusCode != http.StatusOK && err != nil {
+			log.Printf("ipfs cat err: %s", err.Error())
+			continue
+		}
+		defer resp.Body.Close()
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("ipfs cat err: %s", err.Error())
+			continue
+		}
+		type Image struct {
+			Image string `json:"image"`
+		}
+		var image Image
+		_ = json.Unmarshal(b, &image)
+		if image.Image != "" {
+			newList = append(newList, image.Image)
+		}
+	}
+	return
+}
+
 func pinIpfs(ipfs []string) {
-	resp, err := http.Post(fmt.Sprintf("%s/api/v0/pin/add", ipfsApiAddr), "application/json", strings.NewReader(`{"args":["`+strings.Join(ipfs, ",")+`"]}`))
-	log.Println(resp, err)
+	for _, v := range ipfs {
+		resp, err := http.Post(fmt.Sprintf("%s/api/v0/pin/add?arg=%s", ipfsApiAddr, v), "text/plain; charset=utf-8", nil)
+		if err != nil {
+			log.Printf("ipfs pin err: %s", err.Error())
+		}
+	}
 }
 
 func formatIpfs(ipfs []string) []string {
 	for k := range ipfs {
 		ipfs[k] = strings.Replace(ipfs[k], "ipfs://", "/ipfs/", -1)
+	}
+	m := make(map[string]bool)
+	for _, v := range ipfs {
+		m[v] = true
+	}
+	ipfs = []string{}
+	for k := range m {
+		ipfs = append(ipfs, k)
 	}
 	return ipfs
 }
