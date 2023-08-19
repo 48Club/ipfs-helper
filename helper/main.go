@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	ipfsApiAddr        = "http://ipfs:5001"
-	bscRpcAddr         = "https://rpc-bsc.bnb48.club"
+	ipfsApiAddr        = "http://127.0.0.1:5001"
+	bscRpcAddr         = "https://rpc-bsc.48.club"
 	nftAddr            = common.HexToAddress("0x57b81C140BdfD35dbfbB395360a66D54a650666D")
 	nftAbi, _          = abi.JSON(strings.NewReader(`[{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}]`))
 	totalSupplyData, _ = nftAbi.Pack("totalSupply")

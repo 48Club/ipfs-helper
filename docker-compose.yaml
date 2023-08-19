@@ -2,21 +2,16 @@ version: "3"
 services:
   ipfs:
     restart: always
+    container_name: ipfs
     image: ipfs/go-ipfs
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
-    expose:
-      - 5001
-    ports:
-      - 10.0.0.3:8080:8080
-      - 0.0.0.0:4001:4001/tcp
-      - 0.0.0.0:4001:4001/udp
+    network_mode: host
     volumes:
       - /mnt/ipfs:/data/ipfs
 
   helper:
     restart: always
+    container_name: ipfs-helper
     build: helper
+    network_mode: host
     depends_on:
       - ipfs
